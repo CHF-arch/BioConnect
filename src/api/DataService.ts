@@ -1,25 +1,30 @@
-import { supabase } from '../supabaseClient';
-import type { Profile, Service, SocialLink, Project } from '../types/DatabaseTypes';
+import { supabase } from "../supabaseClient";
+import type {
+  Profile,
+  Service,
+  SocialLink,
+  Project,
+} from "../types/DatabaseTypes";
 
 class DataService {
   // --- Profile Operations ---
-  
+
   async getProfile(userId: string) {
     const { data, error } = await supabase
-      .from('Profile')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle(); // Changed from .single() to .maybeSingle()
-    
+      .from("Profile")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
     if (error) throw error;
     return data as Profile | null;
   }
 
   async updateProfile(userId: string, updates: Partial<Profile>) {
     const { data, error } = await supabase
-      .from('Profile')
+      .from("Profile")
       .update(updates)
-      .eq('id', userId)
+      .eq("id", userId)
       .select()
       .single();
 
@@ -29,7 +34,7 @@ class DataService {
 
   async upsertProfile(profile: Profile) {
     const { data, error } = await supabase
-      .from('Profile')
+      .from("Profile")
       .upsert(profile)
       .select()
       .single();
@@ -37,23 +42,71 @@ class DataService {
     if (error) throw error;
     return data as Profile;
   }
+  // Add this method to the DataService class
+
+  async uploadAvatar(userId: string, file: File): Promise<string> {
+    try {
+      // Create a unique file name
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      throw error;
+    }
+  }
+
+  async deleteAvatar(avatarUrl: string): Promise<void> {
+    try {
+      // Extract file path from URL
+      const urlParts = avatarUrl.split("/avatars/");
+      if (urlParts.length < 2) return;
+
+      const filePath = urlParts[1];
+
+      const { error } = await supabase.storage
+        .from("avatars")
+        .remove([filePath]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error deleting avatar:", error);
+      throw error;
+    }
+  }
 
   // --- Services Operations ---
 
   async getServices(userId: string) {
     const { data, error } = await supabase
-      .from('Services')
-      .select('*')
-      .eq('profile_id', userId)
-      .order('sort_order', { ascending: true });
+      .from("Services")
+      .select("*")
+      .eq("profile_id", userId)
+      .order("sort_order", { ascending: true });
 
     if (error) throw error;
     return data as Service[];
   }
 
-  async createService(service: Omit<Service, 'id'>) {
+  async createService(service: Omit<Service, "id">) {
     const { data, error } = await supabase
-      .from('Services')
+      .from("Services")
       .insert(service)
       .select()
       .single();
@@ -64,9 +117,9 @@ class DataService {
 
   async updateService(id: number, updates: Partial<Service>) {
     const { data, error } = await supabase
-      .from('Services')
+      .from("Services")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -75,10 +128,7 @@ class DataService {
   }
 
   async deleteService(id: number) {
-    const { error } = await supabase
-      .from('Services')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("Services").delete().eq("id", id);
 
     if (error) throw error;
   }
@@ -87,17 +137,17 @@ class DataService {
 
   async getSocialLinks(userId: string) {
     const { data, error } = await supabase
-      .from('SocialLinks')
-      .select('*')
-      .eq('profile_id', userId);
+      .from("SocialLinks")
+      .select("*")
+      .eq("profile_id", userId);
 
     if (error) throw error;
     return data as SocialLink[];
   }
 
-  async createSocialLink(link: Omit<SocialLink, 'id'>) {
+  async createSocialLink(link: Omit<SocialLink, "id">) {
     const { data, error } = await supabase
-      .from('SocialLinks')
+      .from("SocialLinks")
       .insert(link)
       .select()
       .single();
@@ -108,9 +158,9 @@ class DataService {
 
   async updateSocialLink(id: number, updates: Partial<SocialLink>) {
     const { data, error } = await supabase
-      .from('SocialLinks')
+      .from("SocialLinks")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -119,10 +169,7 @@ class DataService {
   }
 
   async deleteSocialLink(id: number) {
-    const { error } = await supabase
-      .from('SocialLinks')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("SocialLinks").delete().eq("id", id);
 
     if (error) throw error;
   }
@@ -131,18 +178,18 @@ class DataService {
 
   async getProjects(userId: string) {
     const { data, error } = await supabase
-      .from('Projects')
-      .select('*')
-      .eq('profile_id', userId)
-      .order('sort_order', { ascending: true });
+      .from("Projects")
+      .select("*")
+      .eq("profile_id", userId)
+      .order("sort_order", { ascending: true });
 
     if (error) throw error;
     return data as Project[];
   }
 
-  async createProject(project: Omit<Project, 'id'>) {
+  async createProject(project: Omit<Project, "id">) {
     const { data, error } = await supabase
-      .from('Projects')
+      .from("Projects")
       .insert(project)
       .select()
       .single();
@@ -153,9 +200,9 @@ class DataService {
 
   async updateProject(id: number, updates: Partial<Project>) {
     const { data, error } = await supabase
-      .from('Projects')
+      .from("Projects")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -164,10 +211,7 @@ class DataService {
   }
 
   async deleteProject(id: number) {
-    const { error } = await supabase
-      .from('Projects')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("Projects").delete().eq("id", id);
 
     if (error) throw error;
   }
