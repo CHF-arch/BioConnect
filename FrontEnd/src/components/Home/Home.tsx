@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { dataService } from "../../api/DataService";
 import type { Profile } from "../../types/DatabaseTypes";
 import styles from "./Home.module.css";
 import { IoPersonSharp } from "react-icons/io5";
 import LeftView from "./LeftView/LeftView";
 import { useAuth } from "../../context/AuthContext";
+import { getProfile } from "../../api/Profile/Profile";
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,7 +14,8 @@ export default function Home() {
     const testProfile = async () => {
       if (user?.sub) {
         try {
-          const profile = await dataService.getProfile(user.sub);
+          const profile = await getProfile();
+          setProfile(profile);
           console.log("Profile:", profile);
         } catch (error) {
           console.error("Error:", error);

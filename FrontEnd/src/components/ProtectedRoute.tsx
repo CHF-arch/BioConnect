@@ -4,7 +4,6 @@ import { Navigate, Outlet } from "react-router-dom";
 const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Show loading while Auth0 is checking authentication
   if (isLoading) {
     return (
       <div
@@ -19,7 +18,6 @@ const ProtectedRoute = () => {
     );
   }
 
-  // Only redirect if we're sure user is not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

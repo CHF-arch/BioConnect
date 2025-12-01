@@ -27,3 +27,6 @@ dist-ssr
 
 .venv
 __pycache__/
+
+uploads/
+*.db

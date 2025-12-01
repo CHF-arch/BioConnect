@@ -1,9 +1,18 @@
 import { useRef, useState } from "react";
 import styles from "./LeftView.module.css";
-import { FaCheck, FaTimes, FaSave, FaEdit, FaCamera } from "react-icons/fa";
+import {
+  FaCheck,
+  FaTimes,
+  FaSave,
+  FaEdit,
+  FaCamera,
+  FaTrash,
+} from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
 import type { Profile, Project } from "../../../types/DatabaseTypes";
-import { dataService } from "../../../api/DataService";
+// import { dataService } from "../../../api/DataService"
+import { DeleteProfile } from "../../../api/Profile/Profile";
+import { uploadAvatar } from "../../../api/Profile/Profile";
 
 interface LeftViewProps {
   profile: Profile | null;
@@ -14,14 +23,13 @@ interface LeftViewProps {
 export default function LeftView({
   profile,
   projects,
-  onProfileUpdate,
+  // onProfileUpdate,
 }: LeftViewProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Editable fields
   const [firstName, setFirstName] = useState<string>(profile?.FirstName || "");
   const [lastName, setLastName] = useState<string>(profile?.LastName || "");
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
@@ -31,9 +39,9 @@ export default function LeftView({
   const hasChanges =
     (profile && firstName !== profile.FirstName) ||
     (profile && lastName !== profile.LastName);
+  console.log(profile);
 
   const handleCancelEdit = () => {
-    // Revert changes
     if (profile) {
       setFirstName(profile.FirstName);
       setLastName(profile.LastName);
@@ -56,17 +64,17 @@ export default function LeftView({
         updates.LastName = lastName;
       }
 
-      if (Object.keys(updates).length > 0) {
-        const updatedProfile = await dataService.updateProfile(
-          profile.id,
-          updates
-        );
-        onProfileUpdate(updatedProfile);
+      // if (Object.keys(updates).length > 0) {
+      //   const updatedProfile = await dataService.updateProfile(
+      //     profile.id,
+      //     updates
+      //   );
+      //   onProfileUpdate(updatedProfile);
 
-        // Show success message
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2000);
-      }
+      //   // Show success message
+      //   setSaveSuccess(true);
+      //   setTimeout(() => setSaveSuccess(false), 2000);
+      // }
 
       // Exit edit mode
       setIsEditingName(false);
@@ -105,19 +113,20 @@ export default function LeftView({
       setUploadingAvatar(true);
 
       // Delete old avatar if exists
-      if (profile.avatar_url) {
-        await dataService.deleteAvatar(profile.avatar_url).catch(console.error);
-      }
+      // if (profile.avatar_url) {
+      //   await dataService.deleteAvatar(profile.avatar_url).catch(console.error);
+      // }
 
-      // Upload new avatar
-      const avatarUrl = await dataService.uploadAvatar(profile.id, file);
+      // // Upload new avatar
+      const avatarUrl = await uploadAvatar(profile.id, file);
+      console.log(avatarUrl);
 
-      // Update profile with new avatar URL
-      const updatedProfile = await dataService.updateProfile(profile.id, {
-        avatar_url: avatarUrl,
-      });
+      // // Update profile with new avatar URL
+      // const updatedProfile = await dataService.updateProfile(profile.id, {
+      //   avatar_url: avatarUrl,
+      // });
 
-      onProfileUpdate(updatedProfile);
+      // onProfileUpdate(updatedProfile);
 
       // Show success
       setSaveSuccess(true);
@@ -132,6 +141,11 @@ export default function LeftView({
         fileInputRef.current.value = "";
       }
     }
+  };
+
+  const handleDeleteProfile = async (id: string) => {
+    // if (!profile?.id) return;
+    await DeleteProfile(id);
   };
 
   return (
@@ -247,6 +261,11 @@ export default function LeftView({
               />
             )}
           </div>
+          <button
+            className={styles.deleteButton}
+            onClick={() => handleDeleteProfile(profile?.id || "")}>
+            <FaTrash /> Delete Profile
+          </button>
         </div>
       </div>
 

@@ -1,33 +1,12 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./Auth.module.css";
 
 export default function Auth() {
-  const { loginWithRedirect, isAuthenticated, isLoading, error } = useAuth0();
-  const navigate = useNavigate();
+  const { loginWithRedirect, isLoading } = useAuth();
 
   if (isLoading) {
     return <div className={styles.authContainer}>Loading...</div>;
   }
-
-  if (isAuthenticated) {
-    navigate("/");
-    return null;
-  }
-
-  const handleLogin = async () => {
-    try {
-      console.log("Attempting to login with Auth0...");
-      await loginWithRedirect({
-        authorizationParams: {
-          redirect_uri: window.location.origin,
-        },
-      });
-    } catch (err) {
-      console.error("Login error:", err);
-      alert("Login failed. Please check the console for details.");
-    }
-  };
 
   return (
     <div className={styles.authContainer}>
@@ -36,20 +15,7 @@ export default function Auth() {
         <p style={{ marginBottom: "2rem", color: "var(--text-secondary)" }}>
           Sign in to continue
         </p>
-        {error && (
-          <div
-            style={{
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              backgroundColor: "#ff4444",
-              color: "white",
-              borderRadius: "8px",
-              fontSize: "0.9rem",
-            }}>
-            Error: {error.message}
-          </div>
-        )}
-        <button className={styles.authButton} onClick={handleLogin}>
+        <button className={styles.authButton} onClick={loginWithRedirect}>
           Log In with Auth0
         </button>
       </div>
