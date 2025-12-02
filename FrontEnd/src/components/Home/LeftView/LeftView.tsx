@@ -11,23 +11,18 @@ import {
   FaPhone,
 } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
-import type { Project } from "../../../types/DatabaseTypes";
 import { DeleteProfile } from "../../../api/Profile/Profile";
 import { uploadAvatar } from "../../../api/Profile/Profile";
 import { updateProfile } from "../../../api/Profile/Profile";
-import type { Profile } from "../../../types/Profile";
+import type { Profile } from "../../../types/ProfileTypes";
+import { Projects } from "../Projects/Projects";
 
 interface LeftViewProps {
   profile: Profile | null;
-  projects: Project[];
   onProfileUpdate: (profile: Profile) => void;
 }
 
-export default function LeftView({
-  profile,
-  projects,
-  onProfileUpdate,
-}: LeftViewProps) {
+export default function LeftView({ profile, onProfileUpdate }: LeftViewProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -335,17 +330,7 @@ export default function LeftView({
         <button className={styles.addButton}>+ Add Project</button>
 
         <div className={styles.projectsList}>
-          {projects.map((project) => (
-            <div key={project.id} className={styles.projectItem}>
-              <div className={styles.projectInfo}>
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-              </div>
-              <button className={styles.editButton}>
-                <FaEdit />
-              </button>
-            </div>
-          ))}
+          <Projects profile_id={profile?.id as string} />
         </div>
       </div>
     </div>

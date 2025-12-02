@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import SocialLink
-from schemas import SocialLinkCreate, SocialLinkResponse
+from Models.SocialLinkModel import SocialLink
+from Schemas.SocialLinksSchema import SocialLinkCreate, SocialLinkResponse
 from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()

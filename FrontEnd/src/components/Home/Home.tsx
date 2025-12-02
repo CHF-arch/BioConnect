@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type { Profile } from "../../types/Profile";
+import type { Profile } from "../../types/ProfileTypes";
 import styles from "./Home.module.css";
-import { IoPersonSharp } from "react-icons/io5";
 import LeftView from "./LeftView/LeftView";
 import { useAuth } from "../../context/AuthContext";
 import { getProfile } from "../../api/Profile/Profile";
+import RightView from "./RightView/RightView";
 
 export default function Home() {
   const { user } = useAuth();
@@ -34,7 +34,6 @@ export default function Home() {
       <LeftView
         profile={profile || null}
         onProfileUpdate={handleProfileUpdate}
-        projects={[]}
       />
 
       <div className={styles.previewPanel}>
@@ -45,34 +44,7 @@ export default function Home() {
           </span>
         </div>
 
-        <div className={styles.phoneFrame}>
-          <div className={styles.phoneNotch}></div>
-          <div className={styles.phoneContent}>
-            <div className={styles.previewProfile}>
-              <div className={styles.previewAvatarWrapper}>
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    className={styles.previewAvatar}
-                  />
-                ) : (
-                  <div className={styles.previewAvatarPlaceholder}>
-                    <IoPersonSharp size={40} />
-                  </div>
-                )}
-              </div>
-              <h2 className={styles.previewName}>
-                {profile?.FirstName} {profile?.LastName}
-              </h2>
-            </div>
-
-            <div className={styles.previewProjects}>
-              <h3 className={styles.previewSectionTitle}>Projects</h3>
-              <p>No projects available</p>
-            </div>
-          </div>
-        </div>
+        <RightView profile={profile} />
       </div>
     </div>
   );

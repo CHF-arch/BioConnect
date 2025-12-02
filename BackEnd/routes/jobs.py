@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import Jobs
-from schemas import JobsCreate, JobsResponse
+from Models.JobModel import Job
+from Schemas.JobSchema import JobsCreate, JobsResponse
 from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
@@ -14,7 +14,7 @@ async def get_jobs(
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
-    jobs = db.query(Jobs).filter(Jobs.profile_id == profile_id).all()
+    jobs = db.query(Job).filter(Job.profile_id == profile_id).all()
     return jobs
 
 @router.post("/api/jobs", response_model=JobsResponse)
@@ -25,7 +25,7 @@ async def create_job(
 ):
     user_id = get_user_id_from_token(token_data)
     
-    db_job = Jobs(
+    db_job = Job(
         profile_id=user_id,
         title=job.title,
         description=job.description
@@ -42,7 +42,7 @@ async def update_job(
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
-    db_job = db.query(Jobs).filter(Jobs.id == job_id).first()
+    db_job = db.query(Job).filter(Job.id == job_id).first()
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
     
@@ -59,7 +59,7 @@ async def delete_job(
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
-    db_job = db.query(Jobs).filter(Jobs.id == job_id).first()
+    db_job = db.query(Job).filter(Job.id == job_id).first()
     if not db_job:
         raise HTTPException(status_code=404, detail="Job not found")
     

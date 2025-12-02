@@ -2,15 +2,15 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import Project
-from schemas import ProjectCreate, ProjectResponse
+from Models.ProjectModel import Project
+from Schemas.ProjectSchema import ProjectCreate, ProjectResponse
 from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/projects", response_model=List[ProjectResponse])
+@router.get("/api/projects/{profile_id}", response_model=List[ProjectResponse])
 async def get_projects(
-    profile_id: str = Query(...),
+    profile_id: str,
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
@@ -19,17 +19,16 @@ async def get_projects(
 
 @router.post("/api/projects", response_model=ProjectResponse)
 async def create_project(
+    profile_id: str,
     project: ProjectCreate,
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
-    user_id = get_user_id_from_token(token_data)
-    
     db_project = Project(
-        profile_id=user_id,
+        profile_id=profile_id,
         title=project.title,
         description=project.description,
-        project_link=project.project_link,
+        project_url=project.project_url,
         sort_order=project.sort_order or 0
     )
     db.add(db_project)
@@ -50,7 +49,7 @@ async def update_project(
     
     db_project.title = project.title
     db_project.description = project.description
-    db_project.project_link = project.project_link
+    db_project.project_url = project.project_url
     db_project.sort_order = project.sort_order or 0
     
     db.commit()

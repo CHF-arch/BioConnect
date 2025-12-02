@@ -5,7 +5,7 @@ from typing import Optional
 import httpx
 from config import AUTH0_DOMAIN, AUTH0_AUDIENCE, ALGORITHMS
 from database import SessionLocal
-from models import Profile
+from Models.ProfileModel import Profile
 from sqlalchemy.orm import Session
 
 # Make security optional for Swagger

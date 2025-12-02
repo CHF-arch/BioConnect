@@ -1,5 +1,5 @@
 import { API_URL } from "../../config/api";
-import type { Profile } from "../../types/Profile";
+import type { Profile } from "../../types/ProfileTypes";
 
 export const getProfile = async () => {
   const response = await fetch(`${API_URL}/api/profile/me`, {
@@ -14,7 +14,21 @@ export const getProfile = async () => {
     throw new Error(error.detail || "Failed to get profile");
   }
 
-  return response.json();
+  return response.json() as Promise<Profile>;
+};
+
+export const getProfileById = async (id: string) => {
+  const response = await fetch(`${API_URL}/api/profile/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const error = await response
+      .json()
+      .catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || "Failed to get profile");
+  }
+  return response.json() as Promise<Profile>;
 };
 
 export const createProfile = async (profileData: {

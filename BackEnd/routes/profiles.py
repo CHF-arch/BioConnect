@@ -5,8 +5,8 @@ import shutil
 import uuid
 import os
 from database import get_db
-from models import Profile
-from schemas import ProfileCreate, ProfileResponse
+from Models.ProfileModel import Profile
+from Schemas.ProfileSchema import ProfileCreate, ProfileResponse
 from auth import get_token_data, get_user_id_from_token, get_user_email_from_token, get_or_create_profile
 
 router = APIRouter()
@@ -24,7 +24,9 @@ async def get_my_profile(
     """Get current user's profile - auto-creates if doesn't exist"""
     try:
         profile = get_or_create_profile(token_data, db)
+        print(f"🔍 Profile: {profile}")
         return profile
+        
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

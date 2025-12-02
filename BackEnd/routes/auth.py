@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Response, Depends, Query, status
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.responses import RedirectResponse
-from schemas import TokenRequest
+from Schemas.TokenSchema import TokenRequest
 from auth import verify_token, get_token_data, security, get_or_create_profile
 from config import AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET
 from database import get_db
