@@ -8,7 +8,7 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/services", response_model=List[ServiceResponse])
+@router.get("/api/services", response_model=List[ServiceResponse], tags=["Services"])
 async def get_services(
     profile_id: str = Query(...),
     db: Session = Depends(get_db),
@@ -17,7 +17,7 @@ async def get_services(
     services = db.query(Service).filter(Service.profile_id == profile_id).order_by(Service.sort_order).all()
     return services
 
-@router.post("/api/services", response_model=ServiceResponse)
+@router.post("/api/services", response_model=ServiceResponse, tags=["Services"])
 async def create_service(
     service: ServiceCreate,
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ async def create_service(
     db.refresh(db_service)
     return db_service
 
-@router.put("/api/services/{service_id}", response_model=ServiceResponse)
+@router.put("/api/services/{service_id}", response_model=ServiceResponse, tags=["Services"])
 async def update_service(
     service_id: int,
     service: ServiceCreate,
@@ -55,7 +55,7 @@ async def update_service(
     db.refresh(db_service)
     return db_service
 
-@router.delete("/api/services/{service_id}")
+@router.delete("/api/services/{service_id}", tags=["Services"])
 async def delete_service(
     service_id: int,
     db: Session = Depends(get_db),

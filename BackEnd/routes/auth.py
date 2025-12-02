@@ -10,7 +10,7 @@ from typing import Optional
 
 router = APIRouter()
 
-@router.get("/api/auth/callback")
+@router.get("/api/auth/callback", tags=["Auth"])
 async def auth_callback(
     code: str = Query(...)
 ):
@@ -126,7 +126,7 @@ async def auth_callback(
             detail=f"Authentication failed: {str(e)}"
         )
 
-@router.get("/api/auth/login")
+@router.get("/api/auth/login", tags=["Auth"])
 async def login():
     """Redirect to Auth0 login"""
     from config import AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_AUDIENCE
@@ -143,7 +143,7 @@ async def login():
     return RedirectResponse(url=auth_url)
 
 # Keep existing endpoints
-@router.post("/api/auth/set-cookie")
+@router.post("/api/auth/set-cookie", tags=["Auth"])
 async def set_auth_cookie(
     token_request: TokenRequest,
     response: Response,
@@ -172,7 +172,7 @@ async def set_auth_cookie(
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
 
-@router.delete("/api/auth/logout")
+@router.delete("/api/auth/logout", tags=["Auth"])
 async def logout(response: Response):
     """Clear auth cookie on logout"""
     response.delete_cookie(
@@ -184,11 +184,11 @@ async def logout(response: Response):
     )
     return {"message": "Logged out successfully"}
 
-@router.get("/api/protected")
+@router.get("/api/protected", tags=["Auth"])
 async def protected_route(token_data: dict = Depends(get_token_data)):
     return {"message": "You are authenticated!", "user": token_data}
 
-@router.post("/api/auth/test-set-cookie")
+@router.post("/api/auth/test-set-cookie", tags=["Auth"])
 async def test_set_cookie(
     token: str = Query(..., description="Auth0 token for testing"),
     response: Response = None

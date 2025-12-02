@@ -8,7 +8,7 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/social-links", response_model=List[SocialLinkResponse])
+@router.get("/api/social-links", response_model=List[SocialLinkResponse], tags=["Social Links"])
 async def get_social_links(
     profile_id: str = Query(...),
     db: Session = Depends(get_db),
@@ -17,7 +17,7 @@ async def get_social_links(
     links = db.query(SocialLink).filter(SocialLink.profile_id == profile_id).all()
     return links
 
-@router.post("/api/social-links", response_model=SocialLinkResponse)
+@router.post("/api/social-links", response_model=SocialLinkResponse, tags=["Social Links"])
 async def create_social_link(
     link: SocialLinkCreate,
     db: Session = Depends(get_db),
@@ -35,7 +35,7 @@ async def create_social_link(
     db.refresh(db_link)
     return db_link
 
-@router.put("/api/social-links/{link_id}", response_model=SocialLinkResponse)
+@router.put("/api/social-links/{link_id}", response_model=SocialLinkResponse, tags=["Social Links"])
 async def update_social_link(
     link_id: int,
     link: SocialLinkCreate,
@@ -53,7 +53,7 @@ async def update_social_link(
     db.refresh(db_link)
     return db_link
 
-@router.delete("/api/social-links/{link_id}")
+@router.delete("/api/social-links/{link_id}", tags=["Social Links"])
 async def delete_social_link(
     link_id: int,
     db: Session = Depends(get_db),

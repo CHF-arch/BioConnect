@@ -8,7 +8,7 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/jobs", response_model=List[JobsResponse])
+@router.get("/api/jobs", response_model=List[JobsResponse], tags=["Jobs"])
 async def get_jobs(
     profile_id: str = Query(...),
     db: Session = Depends(get_db),
@@ -17,7 +17,7 @@ async def get_jobs(
     jobs = db.query(Job).filter(Job.profile_id == profile_id).all()
     return jobs
 
-@router.post("/api/jobs", response_model=JobsResponse)
+@router.post("/api/jobs", response_model=JobsResponse, tags=["Jobs"])
 async def create_job(
     job: JobsCreate,
     db: Session = Depends(get_db),
@@ -35,7 +35,7 @@ async def create_job(
     db.refresh(db_job)
     return db_job
 
-@router.put("/api/jobs/{job_id}", response_model=JobsResponse)
+@router.put("/api/jobs/{job_id}", response_model=JobsResponse, tags=["Jobs"])
 async def update_job(
     job_id: int,
     job: JobsCreate,
@@ -53,7 +53,7 @@ async def update_job(
     db.refresh(db_job)
     return db_job
 
-@router.delete("/api/jobs/{job_id}")
+@router.delete("/api/jobs/{job_id}", tags=["Jobs"])
 async def delete_job(
     job_id: int,
     db: Session = Depends(get_db),

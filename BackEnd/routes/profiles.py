@@ -16,7 +16,7 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 # IMPORTANT: More specific routes must come FIRST
-@router.get("/api/profile/me", response_model=ProfileResponse)
+@router.get("/api/profile/me", response_model=ProfileResponse, tags=["Profiles"])
 async def get_my_profile(
     token_data: dict = Depends(get_token_data),
     db: Session = Depends(get_db)
@@ -40,7 +40,7 @@ async def get_my_profile(
         )
 
 # Then the parameterized route
-@router.get("/api/profile/{profile_id}", response_model=ProfileResponse)
+@router.get("/api/profile/{profile_id}", response_model=ProfileResponse, tags=["Profiles"])
 async def get_profile(
     profile_id: str,
     db: Session = Depends(get_db),
@@ -71,7 +71,7 @@ async def get_profile(
             detail=f"Failed to get profile: {str(e)}"
         )
 
-@router.get("/api/profile")
+@router.get("/api/profile", tags=["Profiles"])
 async def get_profile_root(
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
@@ -80,7 +80,7 @@ async def get_profile_root(
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/api/profile/me", status_code=307)
 
-@router.post("/api/profile", response_model=ProfileResponse)
+@router.post("/api/profile", response_model=ProfileResponse, tags=["Profiles"])
 async def create_profile(
     profile: ProfileCreate,
     db: Session = Depends(get_db),
@@ -120,7 +120,7 @@ async def create_profile(
             detail=f"Failed to create profile: {str(e)}"
         )
 
-@router.put("/api/profile/{profile_id}", response_model=ProfileResponse)
+@router.put("/api/profile/{profile_id}", response_model=ProfileResponse, tags=["Profiles"])
 async def update_profile(
     profile_id: str,
     profile: ProfileCreate,
@@ -160,7 +160,7 @@ async def update_profile(
             detail=f"Failed to update profile: {str(e)}"
         )
 
-@router.delete("/api/profile/{profile_id}")
+@router.delete("/api/profile/{profile_id}", tags=["Profiles"])
 async def delete_profile(
     profile_id: str,
     db: Session = Depends(get_db),
@@ -204,7 +204,7 @@ async def delete_profile(
             detail=f"Failed to delete profile: {str(e)}"
         )
 
-@router.post("/api/profile/{profile_id}/avatar")
+@router.post("/api/profile/{profile_id}/avatar", tags=["Profiles"])
 async def upload_avatar(
     profile_id: str,
     file: UploadFile = File(...),
@@ -320,25 +320,3 @@ async def upload_avatar(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload avatar: {str(e)}"
         )
-
-@router.delete("/api/profile/{profile_id}/force-recreate")
-async def force_recreate_profile(
-    profile_id: str,
-    db: Session = Depends(get_db),
-    token_data: dict = Depends(get_token_data)
-):
-    """Temporary endpoint to delete and recreate profile - for testing"""
-    user_id = get_user_id_from_token(token_data)
-    if profile_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-    
-    db_profile = db.query(Profile).filter(Profile.id == profile_id).first()
-    if db_profile:
-        db.delete(db_profile)
-        db.commit()
-    
-    # Recreate using current token data
-    from auth import get_or_create_profile
-    profile = get_or_create_profile(token_data, db)
-    
-    return {"message": "Profile recreated", "profile": profile}

@@ -15,3 +15,4 @@ class Profile(Base):
     services = relationship("Service", back_populates="profile", cascade="all, delete-orphan")
     social_links = relationship("SocialLink", back_populates="profile", cascade="all, delete-orphan")
     projects = relationship("Project", back_populates="profile", cascade="all, delete-orphan")
+    jobs = relationship("Job", back_populates="profile", cascade="all, delete-orphan")

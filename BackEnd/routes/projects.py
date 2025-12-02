@@ -8,7 +8,7 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/projects/{profile_id}", response_model=List[ProjectResponse])
+@router.get("/api/projects/{profile_id}", response_model=List[ProjectResponse], tags=["Projects"])
 async def get_projects(
     profile_id: str,
     db: Session = Depends(get_db),
@@ -17,7 +17,7 @@ async def get_projects(
     projects = db.query(Project).filter(Project.profile_id == profile_id).order_by(Project.sort_order).all()
     return projects
 
-@router.post("/api/projects", response_model=ProjectResponse)
+@router.post("/api/projects", response_model=ProjectResponse, tags=["Projects"])
 async def create_project(
     profile_id: str,
     project: ProjectCreate,
@@ -36,7 +36,7 @@ async def create_project(
     db.refresh(db_project)
     return db_project
 
-@router.put("/api/projects/{project_id}", response_model=ProjectResponse)
+@router.put("/api/projects/{project_id}", response_model=ProjectResponse, tags=["Projects"])
 async def update_project(
     project_id: int,
     project: ProjectCreate,
@@ -56,7 +56,7 @@ async def update_project(
     db.refresh(db_project)
     return db_project
 
-@router.delete("/api/projects/{project_id}")
+@router.delete("/api/projects/{project_id}", tags=["Projects"])
 async def delete_project(
     project_id: int,
     db: Session = Depends(get_db),
