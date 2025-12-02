@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Profile } from "../../types/DatabaseTypes";
+import type { Profile } from "../../types/Profile";
 import styles from "./Home.module.css";
 import { IoPersonSharp } from "react-icons/io5";
 import LeftView from "./LeftView/LeftView";
@@ -8,7 +8,7 @@ import { getProfile } from "../../api/Profile/Profile";
 
 export default function Home() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | undefined>(undefined);
 
   useEffect(() => {
     const testProfile = async () => {
@@ -31,14 +31,12 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      {/* Left Side - Editor */}
       <LeftView
-        profile={profile}
+        profile={profile || null}
         onProfileUpdate={handleProfileUpdate}
         projects={[]}
       />
 
-      {/* Right Side - Phone Preview */}
       <div className={styles.previewPanel}>
         <div className={styles.previewHeader}>
           <h2>Preview</h2>

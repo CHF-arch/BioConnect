@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import styles from "./LeftView.module.css";
 import {
   FaCheck,
@@ -7,12 +7,15 @@ import {
   FaEdit,
   FaCamera,
   FaTrash,
+  FaEnvelope,
+  FaPhone,
 } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
-import type { Profile, Project } from "../../../types/DatabaseTypes";
-// import { dataService } from "../../../api/DataService"
+import type { Project } from "../../../types/DatabaseTypes";
 import { DeleteProfile } from "../../../api/Profile/Profile";
 import { uploadAvatar } from "../../../api/Profile/Profile";
+import { updateProfile } from "../../../api/Profile/Profile";
+import type { Profile } from "../../../types/Profile";
 
 interface LeftViewProps {
   profile: Profile | null;
@@ -23,31 +26,42 @@ interface LeftViewProps {
 export default function LeftView({
   profile,
   projects,
-  // onProfileUpdate,
+  onProfileUpdate,
 }: LeftViewProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [firstName, setFirstName] = useState<string>(profile?.FirstName || "");
-  const [lastName, setLastName] = useState<string>(profile?.LastName || "");
-  const [isEditingName, setIsEditingName] = useState<boolean>(false);
-  const [isEditingLastName, setIsEditingLastName] = useState<boolean>(false);
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  const isEditing = isEditingName || isEditingLastName;
-  const hasChanges =
-    (profile && firstName !== profile.FirstName) ||
-    (profile && lastName !== profile.LastName);
-  console.log(profile);
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.FirstName || "");
+      setLastName(profile.LastName || "");
+      setEmail(profile.email || "");
+      setPhone(profile.phone || "");
+    }
+  }, [profile]);
+
+  const handleStartEdit = () => {
+    setIsEditing(true);
+  };
 
   const handleCancelEdit = () => {
     if (profile) {
-      setFirstName(profile.FirstName);
-      setLastName(profile.LastName);
+      setFirstName(profile.FirstName || "");
+      setLastName(profile.LastName || "");
+      setEmail(profile.email || "");
+      setPhone(profile.phone || "");
     }
-    setIsEditingName(false);
-    setIsEditingLastName(false);
+    setIsEditing(false);
   };
 
   const handleSaveProfile = async () => {
@@ -57,28 +71,36 @@ export default function LeftView({
       setSaving(true);
       const updates: Partial<Profile> = {};
 
-      if (firstName !== profile.FirstName) {
+      if (profile.FirstName !== firstName) {
         updates.FirstName = firstName;
       }
-      if (lastName !== profile.LastName) {
+      if (profile.LastName !== lastName) {
         updates.LastName = lastName;
       }
+      if ((profile.email || "") !== email) {
+        updates.email = email;
+      }
+      if ((profile.phone || "") !== phone) {
+        updates.phone = phone;
+      }
 
-      // if (Object.keys(updates).length > 0) {
-      //   const updatedProfile = await dataService.updateProfile(
-      //     profile.id,
-      //     updates
-      //   );
-      //   onProfileUpdate(updatedProfile);
+      if (Object.keys(updates).length > 0) {
+        const fullUpdate: Partial<Profile> = {
+          FirstName: firstName,
+          LastName: lastName,
+          email: email,
+          phone: phone,
+          avatar_url: profile.avatar_url || undefined,
+        };
 
-      //   // Show success message
-      //   setSaveSuccess(true);
-      //   setTimeout(() => setSaveSuccess(false), 2000);
-      // }
+        const updatedProfile = await updateProfile(profile.id, fullUpdate);
+        onProfileUpdate(updatedProfile);
 
-      // Exit edit mode
-      setIsEditingName(false);
-      setIsEditingLastName(false);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2000);
+      }
+
+      setIsEditing(false);
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Failed to save profile. Please try again.");
@@ -97,13 +119,11 @@ export default function LeftView({
     const file = event.target.files?.[0];
     if (!file || !profile?.id) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       return;
     }
 
-    // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert("File size must be less than 2MB");
       return;
@@ -112,23 +132,24 @@ export default function LeftView({
     try {
       setUploadingAvatar(true);
 
-      // Delete old avatar if exists
-      // if (profile.avatar_url) {
-      //   await dataService.deleteAvatar(profile.avatar_url).catch(console.error);
-      // }
+      const response = await uploadAvatar(profile.id, file);
 
-      // // Upload new avatar
-      const avatarUrl = await uploadAvatar(profile.id, file);
-      console.log(avatarUrl);
+      const avatarUrl = response.avatarUrl || response.avatar_url;
 
-      // // Update profile with new avatar URL
-      // const updatedProfile = await dataService.updateProfile(profile.id, {
-      //   avatar_url: avatarUrl,
-      // });
+      if (!avatarUrl) {
+        throw new Error("Avatar URL not returned from server");
+      }
 
-      // onProfileUpdate(updatedProfile);
+      const updatedProfile = await updateProfile(profile.id, {
+        FirstName: profile.FirstName || "",
+        LastName: profile.LastName || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        avatar_url: avatarUrl,
+      });
 
-      // Show success
+      onProfileUpdate(updatedProfile);
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error) {
@@ -136,21 +157,35 @@ export default function LeftView({
       alert("Failed to upload avatar. Please try again.");
     } finally {
       setUploadingAvatar(false);
-      // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
 
-  const handleDeleteProfile = async (id: string) => {
-    // if (!profile?.id) return;
-    await DeleteProfile(id);
+  const handleDeleteProfile = async () => {
+    if (!profile?.id) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your profile? This action cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      await DeleteProfile(profile.id);
+      alert("Profile deleted successfully");
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      alert("Failed to delete profile. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
     <div className={styles.editorPanel}>
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -173,7 +208,11 @@ export default function LeftView({
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Profile Information</h2>
 
-          {isEditing && (
+          {!isEditing ? (
+            <button className={styles.editButton} onClick={handleStartEdit}>
+              <FaEdit /> Edit
+            </button>
+          ) : (
             <div className={styles.actionButtons}>
               <button
                 className={styles.cancelButton}
@@ -184,7 +223,7 @@ export default function LeftView({
               <button
                 className={styles.saveButton}
                 onClick={handleSaveProfile}
-                disabled={saving || !hasChanges}>
+                disabled={saving}>
                 <FaSave /> {saving ? "Saving..." : "Save"}
               </button>
             </div>
@@ -227,18 +266,12 @@ export default function LeftView({
             <IoPersonSharp className={styles.inputIcon} />
             <input
               type="text"
-              className={`${styles.input} ${isEditingName ? styles.inputEditing : ""}`}
+              className={`${styles.input} ${isEditing ? styles.inputEditing : ""}`}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              disabled={!isEditingName}
+              disabled={!isEditing}
               placeholder="Enter first name"
             />
-            {!isEditingName && (
-              <FaEdit
-                className={styles.editIcon}
-                onClick={() => setIsEditingName(true)}
-              />
-            )}
           </div>
         </div>
 
@@ -248,23 +281,51 @@ export default function LeftView({
             <IoPersonSharp className={styles.inputIcon} />
             <input
               type="text"
-              className={`${styles.input} ${isEditingLastName ? styles.inputEditing : ""}`}
+              className={`${styles.input} ${isEditing ? styles.inputEditing : ""}`}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              disabled={!isEditingLastName}
+              disabled={!isEditing}
               placeholder="Enter last name"
             />
-            {!isEditingLastName && (
-              <FaEdit
-                className={styles.editIcon}
-                onClick={() => setIsEditingLastName(true)}
-              />
-            )}
           </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Email</label>
+          <div className={styles.inputWrapper}>
+            <FaEnvelope className={styles.inputIcon} />
+            <input
+              type="email"
+              className={`${styles.input} ${isEditing ? styles.inputEditing : ""}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={!isEditing}
+              placeholder="Enter email"
+            />
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Phone</label>
+          <div className={styles.inputWrapper}>
+            <FaPhone className={styles.inputIcon} />
+            <input
+              type="tel"
+              className={`${styles.input} ${isEditing ? styles.inputEditing : ""}`}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={!isEditing}
+              placeholder="Enter phone number"
+            />
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
           <button
             className={styles.deleteButton}
-            onClick={() => handleDeleteProfile(profile?.id || "")}>
-            <FaTrash /> Delete Profile
+            onClick={handleDeleteProfile}
+            disabled={deleting}>
+            <FaTrash /> {deleting ? "Deleting..." : "Delete Profile"}
           </button>
         </div>
       </div>
