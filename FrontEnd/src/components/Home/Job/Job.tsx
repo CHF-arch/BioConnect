@@ -47,12 +47,14 @@ export const Jobs = ({ profile_id }: { profile_id: string }) => {
   const handleSubmit = async (formData: {
     title: string;
     description: string;
+    appear: boolean;
   }) => {
     if (!profile_id) return;
 
     const newJob = {
       title: formData.title,
       description: formData.description,
+      appear: formData.appear,
     } as Job;
 
     await handleAddJob(newJob as Job);

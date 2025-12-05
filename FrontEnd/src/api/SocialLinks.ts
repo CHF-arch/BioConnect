@@ -2,9 +2,12 @@ import { apiFetch } from "../utils/apiClient";
 import type { SocialLinksTypes } from "../types/SocialLinksTypes";
 
 export const getSocialLinks = async (profile_id: string) => {
-  const response = await apiFetch(`/social-links/${profile_id}`, {
-    method: "GET",
-  });
+  const response = await apiFetch(
+    `/social-links?profile_id=${encodeURIComponent(profile_id)}`,
+    {
+      method: "GET",
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch social links");
   }

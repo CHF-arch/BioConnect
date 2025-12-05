@@ -8,9 +8,9 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/services/{profile_id}", response_model=List[ServiceResponse], tags=["Services"])
+@router.get("/api/services", response_model=List[ServiceResponse], tags=["Services"])
 async def get_services(
-    profile_id: str,
+    profile_id: str = Query(..., description="Profile ID to get services for"),
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):

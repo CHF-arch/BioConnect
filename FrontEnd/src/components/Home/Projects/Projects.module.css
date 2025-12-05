@@ -121,6 +121,11 @@
 
 /* Add these styles to Projects.module.css or create a separate form CSS module */
 
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 /* Form Styles */
 .form {
   display: flex;

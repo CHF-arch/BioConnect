@@ -250,6 +250,20 @@
   box-shadow: 0 4px 12px var(--shadow);
 }
 
+.checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  transition: all 0.2s;
+}
+
+.checkbox:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .jobItem {

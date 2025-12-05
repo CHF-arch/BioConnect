@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -9,5 +9,5 @@ class Service(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     sort_order = Column(Integer, default=0)
-    
+    appear = Column(Boolean, default=True)
     profile = relationship("Profile", back_populates="services")

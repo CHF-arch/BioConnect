@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
-import type { Project } from "../../../Types/ProjectsTypes";
+import type { Project } from "../../../types/ProjectsTypes";
 import {
   getProjects,
   createProject,
   deleteProject,
-  updateProject,
 } from "../../../api/Projects";
 import { Modal } from "../../Modal/Modal";
 import styles from "./Projects.module.css";
 import { ModalForm } from "./ModalForm";
+import { ModalEditForm } from "./ModalEditForm";
 
 export const Projects = ({ profile_id }: { profile_id: string }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
 
   useEffect(() => {
     if (profile_id) {
@@ -32,6 +34,7 @@ export const Projects = ({ profile_id }: { profile_id: string }) => {
       fetchProjects();
     }
   }, [profile_id]);
+
   const handleAddProject = async (project: Project) => {
     try {
       const newProject = await createProject(project);
@@ -75,13 +78,10 @@ export const Projects = ({ profile_id }: { profile_id: string }) => {
       setError("Failed to delete project");
     }
   };
-  const handleEditProject = async (project: Project) => {
-    try {
-      await updateProject(project);
-      setProjects(projects.map((p) => (p.id === project.id ? project : p)));
-    } catch (error) {
-      setError("Failed to edit project");
-    }
+
+  const handleEditProject = (projectId: number) => {
+    setEditingProjectId(projectId);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -113,12 +113,14 @@ export const Projects = ({ profile_id }: { profile_id: string }) => {
                 <div className={styles.projectActions}>
                   <button
                     className={styles.editButton}
-                    onClick={() => handleEditProject(project)}>
+                    onClick={() => handleEditProject(Number(project?.id) || 0)}>
                     Edit
                   </button>
                   <button
                     className={styles.deleteButton}
-                    onClick={() => handleDeleteProject(project?.id || 0)}>
+                    onClick={() =>
+                      handleDeleteProject(Number(project?.id) || 0)
+                    }>
                     Delete
                   </button>
                 </div>
@@ -134,6 +136,21 @@ export const Projects = ({ profile_id }: { profile_id: string }) => {
         title="Add New Project"
         size="medium">
         <ModalForm onSubmit={handleSubmit} setIsModalOpen={setIsModalOpen} />
+      </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingProjectId(null);
+        }}
+        title="Edit Project"
+        size="medium">
+        {editingProjectId && (
+          <ModalEditForm
+            setIsModalOpen={setIsEditModalOpen}
+            projectId={editingProjectId}
+          />
+        )}
       </Modal>
     </div>
   );

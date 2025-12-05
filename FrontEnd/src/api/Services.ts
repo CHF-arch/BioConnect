@@ -2,9 +2,12 @@ import type { Service } from "../types/ServicesTypes";
 import { apiFetch } from "../utils/apiClient";
 
 export const getServices = async (profile_id: string) => {
-  const response = await apiFetch(`/services/${profile_id}`, {
-    method: "GET",
-  });
+  const response = await apiFetch(
+    `/services?profile_id=${encodeURIComponent(profile_id)}`,
+    {
+      method: "GET",
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch services");
   }

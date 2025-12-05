@@ -2,9 +2,12 @@ import type { Job } from "../types/JobTypes";
 import { apiFetch } from "../utils/apiClient";
 
 export const getJobs = async (profile_id: string): Promise<Job[]> => {
-  const response = await apiFetch(`/jobs/${profile_id}`, {
-    method: "GET",
-  });
+  const response = await apiFetch(
+    `/jobs?profile_id=${encodeURIComponent(profile_id)}`,
+    {
+      method: "GET",
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch jobs");
   }

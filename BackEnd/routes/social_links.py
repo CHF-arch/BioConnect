@@ -8,9 +8,10 @@ from auth import get_token_data, get_user_id_from_token
 
 router = APIRouter()
 
-@router.get("/api/social-links/{profile_id}", response_model=List[SocialLinkResponse], tags=["Social Links"])
+# Remove trailing slash to match frontend calls
+@router.get("/api/social-links", response_model=List[SocialLinkResponse], tags=["Social Links"])
 async def get_social_links(
-    profile_id: str,
+    profile_id: str = Query(..., description="Profile ID to get social links for"),
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
@@ -27,15 +28,12 @@ async def get_social_link_by_id(
         raise HTTPException(status_code=404, detail="Social link not found")
     return db_link
 
-
-
 @router.post("/api/social-links", response_model=SocialLinkResponse, tags=["Social Links"])
 async def create_social_link(
     link: SocialLinkCreate,
     db: Session = Depends(get_db),
     token_data: dict = Depends(get_token_data)
 ):
-
     user_id = get_user_id_from_token(token_data)
     db_link = SocialLink(
         profile_id=user_id,

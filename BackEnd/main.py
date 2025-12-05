@@ -117,15 +117,30 @@ def custom_openapi():
             "type": "apiKey",
             "in": "cookie",
             "name": "access_token",
-            "description": "HTTP-only cookie authentication"
+            "description": "HTTP-only cookie authentication (for frontend)"
         },
         "bearerAuth": {
             "type": "http",
             "scheme": "bearer",
             "bearerFormat": "JWT",
-            "description": "Bearer token authentication (for Swagger testing)"
+            "description": "Bearer token authentication (for Swagger testing). Enter token without 'Bearer' prefix."
         }
     }
+    
+    # Apply security to all paths that require authentication
+    # This makes Swagger UI show the lock icon and allow Bearer token input
+    for path, path_item in openapi_schema.get("paths", {}).items():
+        for method, operation in path_item.items():
+            if method in ["get", "post", "put", "delete", "patch"]:
+                # Skip public endpoints
+                if path in ["/", "/api/auth/login", "/api/auth/callback", "/api/auth/logout", "/openapi.json", "/docs", "/redoc"]:
+                    continue
+                # Add security requirements - allow both methods
+                if "security" not in operation:
+                    operation["security"] = [
+                        {"bearerAuth": []},
+                        {"cookieAuth": []}
+                    ]
     
     app.openapi_schema = openapi_schema
     return app.openapi_schema

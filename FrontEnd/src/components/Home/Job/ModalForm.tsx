@@ -4,6 +4,7 @@ import styles from "./Job.module.css";
 interface FormData {
   title: string;
   description: string;
+  appear: boolean;
 }
 
 export const JobModalForm = ({
@@ -16,6 +17,7 @@ export const JobModalForm = ({
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
+    appear: true,
   });
 
   const handleInputChange = (
@@ -30,7 +32,7 @@ export const JobModalForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData); // ✅ Pass formData to parent
+    onSubmit(formData);
   };
 
   return (
@@ -64,7 +66,20 @@ export const JobModalForm = ({
             className={styles.textarea}
             placeholder="Enter job description"
             rows={4}
-            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="appear" className={styles.label}>
+            Appear
+          </label>
+          <input
+            type="color"
+            id="appear"
+            name="appear"
+            value={formData.appear ? "true" : "false"}
+            onChange={handleInputChange}
+            className={styles.checkbox}
           />
         </div>
 
@@ -73,7 +88,7 @@ export const JobModalForm = ({
             type="button"
             onClick={() => {
               setIsModalOpen(false);
-              setFormData({ title: "", description: "" });
+              setFormData({ title: "", description: "", appear: true });
             }}
             className={styles.cancelButton}>
             Cancel

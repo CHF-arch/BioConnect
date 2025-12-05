@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./Projects.module.css";
 
-interface FormData {
+export interface FormData {
   title: string;
   description: string;
   project_link: string;

@@ -1,5 +1,4 @@
 import styles from "./RightView.module.css";
-import type { Profile } from "../../../Types/ProfileTypes";
 import { IoPersonSharp } from "react-icons/io5";
 import { FaEnvelope, FaPhone, FaExternalLinkAlt } from "react-icons/fa";
 import { SiGithub, SiX } from "react-icons/si";
@@ -16,9 +15,10 @@ import { getJobs } from "../../../api/Job";
 import { getServices } from "../../../api/Services";
 import { getProjects } from "../../../api/Projects";
 import { getSocialLinks } from "../../../api/SocialLinks";
+import type { Profile } from "../../../Types/ProfileTypes";
 import type { Job } from "../../../types/JobTypes";
 import type { Service } from "../../../types/ServicesTypes";
-import type { Project } from "../../../Types/ProjectsTypes";
+import type { Project } from "../../../types/ProjectsTypes";
 import type { SocialLinksTypes } from "../../../types/SocialLinksTypes";
 
 const PlatformIcons: Record<string, React.ReactNode> = {

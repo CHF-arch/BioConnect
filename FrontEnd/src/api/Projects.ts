@@ -1,11 +1,14 @@
-import type { Project } from "../Types/ProjectsTypes";
+import type { Project } from "../types/ProjectsTypes";
 import { apiFetch } from "../utils/apiClient";
 
 export const getProjects = async (profile_id: string) => {
   console.log("profile_id", profile_id);
-  const response = await apiFetch(`/projects/${profile_id}`, {
-    method: "GET",
-  });
+  const response = await apiFetch(
+    `/projects?profile_id=${encodeURIComponent(profile_id)}`,
+    {
+      method: "GET",
+    }
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch projects");
   }

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -10,5 +10,5 @@ class Project(Base):
     description = Column(Text, nullable=True)
     project_link = Column(String, nullable=True)
     sort_order = Column(Integer, default=0)
-    
+    appear = Column(Boolean, default=True)
     profile = relationship("Profile", back_populates="projects")
